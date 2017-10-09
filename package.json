@@ -1,0 +1,7 @@
+{
+  "name": "mocking-server",
+  "version": "1.0.0",
+  "description": "mocking http server for acceptance tests",
+  "main": "index.js",
+  "license": "MIT"
+}
