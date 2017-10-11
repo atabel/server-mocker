@@ -90,16 +90,16 @@ const createMockingServer = () => {
         clear: () => clear(confResp),
     });
 
-    const stub = (confResp: ConfiguredResponse) => ({
+    const clearable = (confResp: ConfiguredResponse) => ({
         clear: () => clear(confResp),
     });
 
-    const mockForRequest = (predicate: RequestPredicate) => ({
+    const mock = (predicate: RequestPredicate) => ({
         returns: (response: Response) => spy(addConfiguredResponse(predicate, response, true)),
     });
 
-    const stubForRequest = (predicate: RequestPredicate) => ({
-        returns: (response: Response) => stub(addConfiguredResponse(predicate, response)),
+    const stub = (predicate: RequestPredicate) => ({
+        returns: (response: Response) => clearable(addConfiguredResponse(predicate, response)),
     });
 
     const clearAll = () => {
@@ -108,8 +108,8 @@ const createMockingServer = () => {
 
     return {
         handle,
-        mockForRequest,
-        stubForRequest,
+        mock,
+        stub,
         clearAll,
     };
 };

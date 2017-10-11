@@ -39,8 +39,8 @@ const createServer = ({port}: {port: number}) => {
             mockingServer.clearAll();
             server.close();
         },
-        stubForRequest: mockingServer.stubForRequest,
-        mockForRequest: mockingServer.mockForRequest,
+        stub: mockingServer.stub,
+        mock: mockingServer.mock,
         clearAll: mockingServer.clearAll,
     };
 };

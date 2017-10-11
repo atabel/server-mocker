@@ -14,14 +14,14 @@ beforeEach(() => {
 });
 
 test('Can stub requests', done => {
-    mockingServer.stubForRequest(withUrlParams({message: 'ping'})).returns(text('pong'));
+    mockingServer.stub(withUrlParams({message: 'ping'})).returns(text('pong'));
 
     request.get('?message=ping').expect(200, 'pong', done);
 });
 
 test('Can spy mocked requests', async () => {
-    const pingMock = mockingServer.mockForRequest(withUrlParams({message: 'ping'})).returns(text('pong'));
-    const pongMock = mockingServer.mockForRequest(withUrlParams({message: 'pong'})).returns(text('ping'));
+    const pingMock = mockingServer.mock(withUrlParams({message: 'ping'})).returns(text('pong'));
+    const pongMock = mockingServer.mock(withUrlParams({message: 'pong'})).returns(text('ping'));
 
     await request.get('?message=ping');
 
@@ -30,7 +30,7 @@ test('Can spy mocked requests', async () => {
 });
 
 test('Can stub a json response', done => {
-    mockingServer.stubForRequest(withUrlParams({message: 'ping'})).returns(json({message: 'pong'}));
+    mockingServer.stub(withUrlParams({message: 'ping'})).returns(json({message: 'pong'}));
 
     request
         .get('?message=ping')
@@ -39,7 +39,7 @@ test('Can stub a json response', done => {
 });
 
 test('Can stub a html response', done => {
-    mockingServer.stubForRequest(withUrlParams({message: 'ping'})).returns(html('<body>hello</body>'));
+    mockingServer.stub(withUrlParams({message: 'ping'})).returns(html('<body>hello</body>'));
 
     request
         .get('?message=ping')
@@ -48,15 +48,15 @@ test('Can stub a html response', done => {
 });
 
 test('The first matching stub wins', done => {
-    mockingServer.stubForRequest(withMethod('GET')).returns(text('this wins'));
-    mockingServer.stubForRequest(withUrlParams({a: 'test'})).returns(text('this loses'));
+    mockingServer.stub(withMethod('GET')).returns(text('this wins'));
+    mockingServer.stub(withUrlParams({a: 'test'})).returns(text('this loses'));
 
     request.get('?a=test').expect(200, 'this wins', done);
 });
 
 test('Stubs can be removed', async () => {
-    const stub1 = mockingServer.stubForRequest(withMethod('GET')).returns(text('stub1'));
-    const stub2 = mockingServer.stubForRequest(withUrlParams({a: 'test'})).returns(text('stub2'));
+    const stub1 = mockingServer.stub(withMethod('GET')).returns(text('stub1'));
+    const stub2 = mockingServer.stub(withUrlParams({a: 'test'})).returns(text('stub2'));
 
     await request.get('?a=test').expect(200, 'stub1');
     stub1.clear();
@@ -64,8 +64,8 @@ test('Stubs can be removed', async () => {
 });
 
 test('Mocks can be removed', async () => {
-    const mock1 = mockingServer.mockForRequest(withMethod('GET')).returns(text('mock1'));
-    const mock2 = mockingServer.mockForRequest(withUrlParams({a: 'test'})).returns(text('mock2'));
+    const mock1 = mockingServer.mock(withMethod('GET')).returns(text('mock1'));
+    const mock2 = mockingServer.mock(withUrlParams({a: 'test'})).returns(text('mock2'));
 
     await request.get('?a=test').expect(200, 'mock1');
     mock1.clear();
