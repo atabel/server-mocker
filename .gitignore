@@ -1,0 +1,8 @@
+lib/
+coverage/
+node_modules/
+yarn-error.log*
+yarn-debug.log*
+npm-debug.log*
+.directory
+.DS_Store
