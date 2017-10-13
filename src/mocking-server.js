@@ -75,7 +75,7 @@ const createMockingServer = () => {
             ...(withSpy ? {spy} : {}),
         };
 
-        configuredResponses.push(configuredResponse);
+        configuredResponses.unshift(configuredResponse);
 
         return configuredResponse;
     };
