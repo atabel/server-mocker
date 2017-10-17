@@ -1,10 +1,11 @@
 // @flow
+const https = require('https');
 const http = require('http');
 const {parse: parseUrl} = require('url');
 const multiparty = require('multiparty');
 const {createMockingServer, text, json, html} = require('./mocking-server');
 
-const createServer = ({port}: {port: number}) => {
+const createServer = ({port, ssl}: {port: number, ssl?: Object}) => {
     const mockingServer = createMockingServer();
 
     const handleRequest = (request, response) => {
@@ -28,7 +29,7 @@ const createServer = ({port}: {port: number}) => {
         });
     };
 
-    const server = http.createServer(handleRequest);
+    const server = ssl ? https.createServer(ssl, handleRequest) : http.createServer(handleRequest);
 
     server.listen(port, undefined, undefined, err => {
         if (err) throw err;

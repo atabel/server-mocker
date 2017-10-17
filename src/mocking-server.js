@@ -43,6 +43,12 @@ const createHtmlResponse = (html: string, headers: ParamsBag = {}): Response =>
 const called = (confResp: ConfiguredResponse) =>
     !!(confResp.spy && confResp.spy.calls && confResp.spy.calls.length);
 
+const calledOnce = (confResp: ConfiguredResponse) =>
+    !!(confResp.spy && confResp.spy.calls && confResp.spy.calls.length === 1);
+
+const getCallCount = (confResp: ConfiguredResponse) =>
+    confResp.spy && confResp.spy.calls ? confResp.spy.calls.length : 0;
+
 const createMockingServer = () => {
     let configuredResponses: Array<ConfiguredResponse> = [];
 
@@ -87,6 +93,8 @@ const createMockingServer = () => {
 
     const spy = (confResp: ConfiguredResponse) => ({
         called: () => called(confResp),
+        calledOnce: () => calledOnce(confResp),
+        getCallCount: () => getCallCount(confResp),
         clear: () => clear(confResp),
     });
 

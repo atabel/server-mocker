@@ -2,7 +2,7 @@
     "name": "mocking-server",
     "version": "1.0.0",
     "description": "mocking http server for acceptance tests",
-    "main": "index.js",
+    "main": "lib/index.js",
     "license": "MIT",
     "scripts": {
         "build": "rm -rf lib && flow && babel src/ -d lib/",
@@ -17,8 +17,12 @@
         "bracketSpacing": false
     },
     "jest": {
-        "collectCoverageFrom": ["src/**/*.js"],
-        "testMatch": ["<rootDir>/src/**/__tests__/**/*.js"]
+        "collectCoverageFrom": [
+            "src/**/*.js"
+        ],
+        "testMatch": [
+            "<rootDir>/src/**/__tests__/**/*.js"
+        ]
     },
     "dependencies": {
         "multiparty": "^4.1.3"
@@ -27,7 +31,7 @@
         "babel-cli": "^6.26.0",
         "babel-plugin-transform-object-rest-spread": "^6.26.0",
         "babel-preset-flow": "^6.23.0",
-        "flow-bin": "^0.56.0",
+        "flow-bin": "^0.57.3",
         "flow-typed": "^2.2.0",
         "jest": "^21.2.1",
         "supertest": "^3.0.0"
