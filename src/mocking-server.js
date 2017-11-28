@@ -49,14 +49,26 @@ const calledOnce = (confResp: ConfiguredResponse) =>
 const getCallCount = (confResp: ConfiguredResponse) =>
     confResp.spy && confResp.spy.calls ? confResp.spy.calls.length : 0;
 
-const createMockingServer = () => {
+export type MockingServerOptions = {
+    onResponseNotFound?: (r: Request) => mixed,
+};
+
+const defaultOptions: MockingServerOptions = {
+    onResponseNotFound(request) {
+        throw `response not found for request ${JSON.stringify(request)}`;
+    },
+};
+
+const createMockingServer = (options: MockingServerOptions = defaultOptions) => {
+    const opts = {...defaultOptions, ...options};
     let configuredResponses: Array<ConfiguredResponse> = [];
 
-    const handle = (request: Request): Response => {
+    const handle = (request: Request): ?Response => {
         const confResp = configuredResponses.find(({predicate}) => predicate(request));
 
         if (!confResp) {
-            throw `response not found for request ${JSON.stringify(request)}`;
+            opts.onResponseNotFound(request);
+            return;
         }
 
         const {response, spy} = confResp;

@@ -15,3 +15,16 @@ test('mocking-server throws on unhandled request', () => {
         server.handle(ANY_REQUEST);
     }).toThrow();
 });
+
+test('mocking-server can listen on unhandled request', () => {
+    let responseNotFound = false;
+    const onResponseNotFound = () => {
+        responseNotFound = true;
+    };
+
+    const server = createMockingServer({onResponseNotFound});
+
+    server.handle(ANY_REQUEST);
+
+    expect(responseNotFound).toBe(true);
+});
