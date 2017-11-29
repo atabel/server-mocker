@@ -22,8 +22,8 @@ Mock responses from your API. Useful for testing / development
         - [`.called()`](#called)
         - [`.calledOnce()`](#calledonce)
         - [`.getCallCount()`](#getcallcount)
-    - [Request](#request)
-    - [Response](#response)
+    - [`Request`](#request)
+    - [`Response`](#response)
     - [`text(content, [headers])`](#textcontent-headers)
     - [`html(content, [headers])`](#htmlcontent-headers)
     - [`json(data, [headers])`](#jsondata-headers)
@@ -214,7 +214,7 @@ Removes the mock from the server
 #### `.getCallCount()`
 **Returns** `number` the number of request handled by the server matching this mock
 
-### Request
+### `Request`
 <!-- type ParamsBag = {[name: string]: string}; -->
 It's an object with these fields:
 * `method`: **string** http method (`'GET'`, `'POST'`, `'PUT'`...)
@@ -223,7 +223,7 @@ It's an object with these fields:
 * `formFields`: **Object** a key-value object with form fields
 * `headers`: **Object** a key-value object with request headers
 
-### Response
+### `Response`
 It's an object with these fields:
 
 * `content`: **string** http response content
