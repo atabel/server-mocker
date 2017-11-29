@@ -2,6 +2,34 @@
 
 Mock responses from your API. Useful for testing / development
 
+<!-- TOC depthFrom:2 -->
+
+- [Install](#install)
+- [Examples](#examples)
+    - [Testing](#testing)
+    - [Dev api server](#dev-api-server)
+- [API](#api)
+    - [`createServer(options)`](#createserveroptions)
+    - [`MokingServer`](#mokingserver)
+        - [`.stub(predicate)`](#stubpredicate)
+        - [`.mock(predicate)`](#mockpredicate)
+        - [`.clearAll()`](#clearall)
+        - [`.close()`](#close)
+    - [`Stub`](#stub)
+        - [`.clear()`](#clear)
+    - [`Mock`](#mock)
+        - [`.clear()`](#clear-1)
+        - [`.called()`](#called)
+        - [`.calledOnce()`](#calledonce)
+        - [`.getCallCount()`](#getcallcount)
+    - [Request](#request)
+    - [Response](#response)
+    - [`text(content, [headers])`](#textcontent-headers)
+    - [`html(content, [headers])`](#htmlcontent-headers)
+    - [`json(data, [headers])`](#jsondata-headers)
+
+<!-- /TOC -->
+
 ## Install
 
 If you use nmp:
@@ -11,6 +39,71 @@ If you use nmp:
 If you use yarn:
 
     yarn add --dev server-mocker
+
+## Examples
+
+### Testing
+You have a webapp with the following code:
+
+```js
+export const getUserData = (userId) =>
+    fetch(`http://localhost:5000/user?id=${userId}`).then(res => res.json());
+```
+
+You want to write a test for that code and you need to mock the server response. You can use `server-mocker`
+
+```js
+import {getUserData} from '../api';
+import {createServer, json} from 'server-mocker';
+
+const mockingServer = createServer({port: 5000});
+
+const requestUser = (expectedUserId) => (request) =>
+    request.urlPath === '/user' && urlParams.id === expectedUserId;
+
+test('getUserData', async () => {
+    const userId = 'any_user_id';
+    const userData = {
+        name: 'Abel',
+    };
+
+    mockingServer.stub(requestUser(userId)).returns(json(userData));
+    
+    const userData = await getUserData(userId);
+
+    expect(userData.name).toBe('Abel');
+});
+
+```
+
+### Dev api server
+You can also use `server-mocker` as a development api server running a small node script:
+
+**dev-api.js**
+```js
+import {createServer, json} from 'server-mocker';
+
+const mockingServer = createServer({port: 5000});
+
+const requestUser = (request) =>
+    request.urlPath === '/user';
+
+mockingServer.stub(user()).returns(json({
+    name: 'Abel',
+}))
+```
+    node dev-api.js
+
+In your application you can change your api endpoint depending on `process.env.NODE_ENV`
+
+```js
+const API_ENDPOINT = process.env.NODE_ENV === 'production'
+    ? 'http://my-real-api.com/'
+    : 'http://localhost:5000'
+
+export const getUserData = (userId) =>
+    fetch(`${API_ENDPOINT}/user?id=${userId}`).then(res => res.json());
+```
 
 ## API
 
@@ -25,7 +118,7 @@ Creates an http(s) server instance where you can mock/stub responses
   - `ssl`?: **[Object](https://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener)** you can pase an object with ssl options to use https. When not specified, the server will use http
   - `onResponseNotFound`?: (r: [`Request`](#request)) => `mixed` You can specify a listener to be called when a the server receives a server which doesn't know how to reply to.
 
-**Returns**: [`MockingServer`](#moking-server)
+**Returns**: [`MockingServer`](#mokingserver)
 
 **Examples**
 ```js
@@ -75,7 +168,7 @@ Similar to `.stub`, the difference is you can make expectations for received req
 - `predicate`: (r: [`Request`](#request)) => `boolean`
 
 **Returns**: `Object` with key:
-* `returns`: ([`Response`](#response)) => [`Mock`](#stub)
+* `returns`: ([`Response`](#response)) => [`Mock`](#mock)
 
 **Example**
 ```js
