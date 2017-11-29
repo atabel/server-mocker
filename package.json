@@ -5,8 +5,9 @@
     "main": "lib/index.js",
     "license": "MIT",
     "scripts": {
-        "build": "rm -rf lib && flow && babel src/ -d lib/",
-        "prepublish": "yarn run build",
+        "build":
+            "rimraf lib && flow && babel src/ -d lib/ --ignore '**/__tests__/**' && flow-copy-source -v -i '**/__tests__/**' src lib",
+        "prepublishOnly": "yarn test && yarn build",
         "test": "jest",
         "precommit": "lint-staged"
     },
