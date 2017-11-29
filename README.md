@@ -1,6 +1,6 @@
 # server-mocker
 
-Mock responses from your API. Useful for testing / development
+Create a mocked http server for your webapp tests and development
 
 <!-- TOC depthFrom:2 -->
 
