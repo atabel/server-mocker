@@ -20,6 +20,13 @@ const createServer = ({port, ssl, ...mockingServerOptions}: Options) => {
             const {method, url, headers} = request;
             const {pathname = '', query = {}} = parseUrl(url, true);
 
+            if (pathname === '/__admin__/kill') {
+                response.write('killed');
+                response.end(() => {
+                    process.exit();
+                });
+            }
+
             const res = mockingServer.handle({
                 method,
                 urlPath: pathname,
