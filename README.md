@@ -32,7 +32,7 @@ Create a mocked http server for your webapp tests and development
 
 ## Install
 
-If you use nmp:
+If you use npm:
 
     npm install --save-dev server-mocker
 
