@@ -52,10 +52,27 @@ const createServer = ({port, ssl, ...mockingServerOptions}: Options) => {
         if (err) throw err;
     });
 
+    const connections = new Set();
+
+    server.on('connection', conn => {
+        connections.add(conn);
+        conn.on('close', () => {
+            connections.delete(conn);
+        });
+    });
+
     return {
-        close() {
-            mockingServer.clearAll();
-            server.close();
+        close(): Promise<void> {
+            return new Promise(resolve => {
+                mockingServer.clearAll();
+                server.close(() => {
+                    resolve();
+                });
+                connections.forEach(conn => {
+                    conn.destroy();
+                });
+                connections.clear();
+            });
         },
         stub: mockingServer.stub,
         mock: mockingServer.mock,
