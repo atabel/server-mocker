@@ -72,6 +72,16 @@ test('Mocks can be removed', async () => {
     await request.get('?a=test').expect(200, 'mock1');
 });
 
+test('Requests made can be retrived', async () => {
+    mockingServer.mock(withMethod('GET')).returns(text('mock'));
+
+    await request.get('/').expect(200, 'mock');
+    expect(mockingServer.getRequests().length).toBe(1);
+
+    await request.get('/').expect(200, 'mock');
+    expect(mockingServer.getRequests().length).toBe(2);
+});
+
 afterAll(() => {
     mockingServer.close();
 });
