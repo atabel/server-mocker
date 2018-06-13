@@ -62,8 +62,10 @@ const defaultOptions: MockingServerOptions = {
 const createMockingServer = (options: MockingServerOptions = defaultOptions) => {
     const opts = {...defaultOptions, ...options};
     let configuredResponses: Array<ConfiguredResponse> = [];
+    let requests: Array<Request> = [];
 
     const handle = (request: Request): ?Response => {
+        requests.push(request);
         const confResp = configuredResponses.find(({predicate}) => predicate(request));
 
         if (!confResp) {
@@ -122,14 +124,18 @@ const createMockingServer = (options: MockingServerOptions = defaultOptions) => 
         returns: (response: Response) => clearable(addConfiguredResponse(predicate, response)),
     });
 
+    const getRequests = (): Array<Request> => requests;
+
     const clearAll = () => {
         configuredResponses = [];
+        requests = [];
     };
 
     return {
         handle,
         mock,
         stub,
+        getRequests,
         clearAll,
     };
 };
