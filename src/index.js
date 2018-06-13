@@ -1,5 +1,5 @@
 // @flow
-import type {MockingServerOptions} from './mocking-server';
+import type {Request} from './mocking-server';
 const https = require('https');
 const http = require('http');
 const {parse: parseUrl} = require('url');
@@ -9,7 +9,8 @@ const {createMockingServer, text, json, html} = require('./mocking-server');
 type Options = {
     port: number,
     ssl?: Object,
-} & MockingServerOptions;
+    onResponseNotFound?: (r: Request) => mixed,
+};
 
 const createServer = ({port, ssl, ...mockingServerOptions}: Options) => {
     const mockingServer = createMockingServer(mockingServerOptions);

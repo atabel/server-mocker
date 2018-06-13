@@ -1,7 +1,7 @@
 // @flow
 type ParamsBag = {[name: string]: string};
 
-type Request = {
+export type Request = {
     method: string,
     urlPath: string,
     urlParams: ParamsBag,
@@ -49,7 +49,7 @@ const calledOnce = (confResp: ConfiguredResponse) =>
 const getCallCount = (confResp: ConfiguredResponse) =>
     confResp.spy && confResp.spy.calls ? confResp.spy.calls.length : 0;
 
-export type MockingServerOptions = {
+type MockingServerOptions = {
     onResponseNotFound?: (r: Request) => mixed,
 };
 
@@ -124,7 +124,7 @@ const createMockingServer = (options: MockingServerOptions = defaultOptions) => 
         returns: (response: Response) => clearable(addConfiguredResponse(predicate, response)),
     });
 
-    const getRequests = (): Array<Request> => requests;
+    const getRequests = () => requests;
 
     const clearAll = () => {
         configuredResponses = [];
