@@ -4,6 +4,7 @@
     "description": "mocking http server for acceptance tests",
     "main": "lib/index.js",
     "license": "MIT",
+    "files": ["lib/", "README.md"],
     "scripts": {
         "build":
             "rimraf lib && flow && babel src/ -d lib/ --ignore '**/__tests__/**' && flow-copy-source -v -i '**/__tests__/**' src lib",
