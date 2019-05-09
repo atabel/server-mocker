@@ -77,6 +77,7 @@ const createServer = ({port, ssl, ...mockingServerOptions}: Options) => {
         },
         stub: mockingServer.stub,
         mock: mockingServer.mock,
+        mockImplementation: mockingServer.mockImplementation,
         getRequests: mockingServer.getRequests,
         clearAll: mockingServer.clearAll,
     };

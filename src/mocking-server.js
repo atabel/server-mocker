@@ -19,7 +19,7 @@ type RequestPredicate = (req: Request) => boolean;
 
 type ConfiguredResponse = {
     predicate: RequestPredicate,
-    response: Response,
+    responseHandler: Request => Response,
     spy?: {
         calls: Array<Request>,
     },
@@ -73,26 +73,22 @@ const createMockingServer = (options: MockingServerOptions = defaultOptions) => 
             return;
         }
 
-        const {response, spy} = confResp;
+        const {responseHandler, spy} = confResp;
 
         if (spy) {
             spy.calls.push(request);
         }
 
-        return response;
+        return responseHandler(request);
     };
 
     const addConfiguredResponse = (
         predicate: RequestPredicate,
-        response: Response,
-        withSpy = false
+        responseHandler: Request => Response
     ): ConfiguredResponse => {
-        const spy = {calls: []};
-
         const configuredResponse = {
             predicate,
-            response,
-            ...(withSpy ? {spy} : {}),
+            responseHandler,
         };
 
         configuredResponses.unshift(configuredResponse);
@@ -105,24 +101,30 @@ const createMockingServer = (options: MockingServerOptions = defaultOptions) => 
         configuredResponses.splice(index, 1);
     };
 
-    const spy = (confResp: ConfiguredResponse) => ({
-        called: () => called(confResp),
-        calledOnce: () => calledOnce(confResp),
-        getCallCount: () => getCallCount(confResp),
-        clear: () => clear(confResp),
-    });
+    const spy = (confResp: ConfiguredResponse) => {
+        confResp.spy = {calls: []};
+        return {
+            called: () => called(confResp),
+            calledOnce: () => calledOnce(confResp),
+            getCallCount: () => getCallCount(confResp),
+            clear: () => clear(confResp),
+        };
+    };
 
     const clearable = (confResp: ConfiguredResponse) => ({
         clear: () => clear(confResp),
     });
 
     const mock = (predicate: RequestPredicate) => ({
-        returns: (response: Response) => spy(addConfiguredResponse(predicate, response, true)),
+        returns: (response: Response) => spy(addConfiguredResponse(predicate, () => response)),
     });
 
     const stub = (predicate: RequestPredicate) => ({
-        returns: (response: Response) => clearable(addConfiguredResponse(predicate, response)),
+        returns: (response: Response) => mockImplementation(predicate, () => response),
     });
+
+    const mockImplementation = (predicate: RequestPredicate, implementation: Request => Response) =>
+        clearable(addConfiguredResponse(predicate, implementation));
 
     const getRequests = () => requests;
 
@@ -135,6 +137,7 @@ const createMockingServer = (options: MockingServerOptions = defaultOptions) => 
         handle,
         mock,
         stub,
+        mockImplementation,
         getRequests,
         clearAll,
     };

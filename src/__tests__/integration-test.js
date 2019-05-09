@@ -9,6 +9,8 @@ const withUrlParams = (expectedUrlParams: {}) => ({urlParams}) =>
 
 const withMethod = expectedMethod => ({method}) => method === expectedMethod;
 
+const anyRequest = () => true;
+
 beforeEach(() => {
     mockingServer.clearAll();
 });
@@ -27,6 +29,24 @@ test('Can spy mocked requests', async () => {
 
     expect(pingMock.called()).toBe(true);
     expect(pongMock.called()).toBe(false);
+});
+
+test('Can mock with custom implementation', async () => {
+    const spy = jest.fn(req => text(req.urlParams.message));
+    const pingMock = mockingServer.mockImplementation(withUrlParams({message: 'ping'}), spy);
+
+    const response = await request.get('?message=ping');
+
+    expect(spy).toHaveBeenCalled();
+});
+
+test('allows asserting calledWith using mockImplementation', async () => {
+    const spy = jest.fn(() => text('any response text'));
+    const pingMock = mockingServer.mockImplementation(anyRequest, req => spy(req.urlParams));
+
+    const response = await request.get('?message=ping');
+
+    expect(spy).toHaveBeenCalledWith({message: 'ping'});
 });
 
 test('Can stub a json response', done => {
