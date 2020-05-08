@@ -10,11 +10,11 @@
     ],
     "scripts": {
         "build": "rimraf lib && flow check && babel src/ -d lib/ --ignore '**/__tests__/**' && flow-copy-source -v -i '**/__tests__/**' src lib",
+        "test": "jest",
+        "prettier-check": "prettier . --check",
         "ci": "yarn prettier-check && yarn test --ci && yarn build",
         "prepublishOnly": "yarn ci",
-        "test": "jest",
-        "precommit": "lint-staged",
-        "prettier-check": "prettier . --check"
+        "precommit": "lint-staged"
     },
     "lint-staged": {
         "*.{js,json,css,md}": [
