@@ -1,8 +1,9 @@
 //@flow
-const SERVER_PORT = 6666;
-const request = require('supertest')(`http://localhost:${SERVER_PORT}`);
+const supertest = require('supertest');
 const {createServer, text, json, html} = require('../index');
-const mockingServer = createServer({port: SERVER_PORT});
+const mockingServer = createServer();
+
+const request = supertest(`http://localhost:${mockingServer.port}`);
 
 const withUrlParams = (expectedUrlParams: {}) => ({urlParams}) =>
     Object.keys(expectedUrlParams).every(paramName => urlParams[paramName] === expectedUrlParams[paramName]);
@@ -13,6 +14,12 @@ const anyRequest = () => true;
 
 beforeEach(() => {
     mockingServer.clearAll();
+});
+
+test('Can config the sever port', () => {
+    const mockingServer = createServer({port: 6666});
+    expect(mockingServer.port).toBe(6666);
+    mockingServer.close();
 });
 
 test('Can stub requests', done => {

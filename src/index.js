@@ -7,12 +7,13 @@ const multiparty = require('multiparty');
 const {createMockingServer, text, json, html} = require('./mocking-server');
 
 type Options = {
-    port: number,
+    port?: number,
     ssl?: Object,
     onResponseNotFound?: (r: Request) => mixed,
 };
 
-const createServer = ({port, ssl, ...mockingServerOptions}: Options) => {
+const createServer = (options?: Options = {}) => {
+    const {port = 0, ssl, ...mockingServerOptions} = options;
     const mockingServer = createMockingServer(mockingServerOptions);
 
     const handleRequest = (request, response) => {
@@ -80,6 +81,7 @@ const createServer = ({port, ssl, ...mockingServerOptions}: Options) => {
         mockImplementation: mockingServer.mockImplementation,
         getRequests: mockingServer.getRequests,
         clearAll: mockingServer.clearAll,
+        port: server.address().port,
     };
 };
 
