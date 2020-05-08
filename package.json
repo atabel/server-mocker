@@ -9,7 +9,7 @@
         "README.md"
     ],
     "scripts": {
-        "build": "rimraf lib && flow && babel src/ -d lib/ --ignore '**/__tests__/**' && flow-copy-source -v -i '**/__tests__/**' src lib",
+        "build": "rimraf lib && flow check && babel src/ -d lib/ --ignore '**/__tests__/**' && flow-copy-source -v -i '**/__tests__/**' src lib",
         "prepublishOnly": "yarn test && yarn build",
         "test": "jest",
         "precommit": "lint-staged"
@@ -45,13 +45,13 @@
         "@babel/preset-flow": "^7.9.0",
         "babel-core": "^6.26.3",
         "babel-jest": "^26.0.1",
-        "flow-bin": "^0.74.0",
-        "flow-copy-source": "^1.2.1",
-        "flow-typed": "^2.2.0",
-        "husky": "^0.14.3",
-        "jest": "^21.2.1",
-        "lint-staged": "^5.0.0",
-        "prettier": "^1.17.0",
-        "supertest": "^3.0.0"
+        "flow-bin": "^0.124.0",
+        "flow-copy-source": "^2.0.9",
+        "flow-typed": "^3.1.0",
+        "husky": "^4.2.5",
+        "jest": "^26.0.1",
+        "lint-staged": "^10.2.2",
+        "prettier": "^2.0.5",
+        "supertest": "^4.0.2"
     }
 }

@@ -1,10 +1,24 @@
 // @flow
-import type {Request} from './mocking-server';
+import type {Request, Response} from './mocking-server';
 const https = require('https');
 const http = require('http');
 const {parse: parseUrl} = require('url');
 const multiparty = require('multiparty');
 const {createMockingServer, text, json, html} = require('./mocking-server');
+
+type RequestPredicate = (req: Request) => boolean;
+
+type MockingServer = $Call<typeof createMockingServer, any>;
+
+type Server = {
+    port: number,
+    close: () => Promise<void>,
+    clearAll: $PropertyType<MockingServer, 'clearAll'>,
+    getRequests: $PropertyType<MockingServer, 'getRequests'>,
+    mock: $PropertyType<MockingServer, 'mock'>,
+    mockImplementation: $PropertyType<MockingServer, 'mockImplementation'>,
+    stub: $PropertyType<MockingServer, 'stub'>,
+};
 
 type Options = {
     port?: number,
@@ -12,15 +26,15 @@ type Options = {
     onResponseNotFound?: (r: Request) => mixed,
 };
 
-const createServer = (options?: Options = {}) => {
-    const {port = 0, ssl, ...mockingServerOptions} = options;
-    const mockingServer = createMockingServer(mockingServerOptions);
+const createServer = (options?: Options): Server => {
+    const {port = 0, ssl, onResponseNotFound} = options || {};
+    const mockingServer = createMockingServer({onResponseNotFound});
 
     const handleRequest = (request, response) => {
         const form = new multiparty.Form();
         form.parse(request, (err, formFields = {}, files) => {
             const {method, url, headers} = request;
-            const {pathname = '', query = {}} = parseUrl(url, true);
+            const {pathname, query = {}} = parseUrl(url, true);
 
             if (pathname === '/__admin__/kill') {
                 response.write('killed');
@@ -31,7 +45,7 @@ const createServer = (options?: Options = {}) => {
 
             const res = mockingServer.handle({
                 method,
-                urlPath: pathname,
+                urlPath: pathname || '',
                 urlParams: query,
                 headers,
                 formFields,

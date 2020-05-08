@@ -5,10 +5,12 @@ const mockingServer = createServer();
 
 const request = supertest(`http://localhost:${mockingServer.port}`);
 
-const withUrlParams = (expectedUrlParams: {}) => ({urlParams}) =>
-    Object.keys(expectedUrlParams).every(paramName => urlParams[paramName] === expectedUrlParams[paramName]);
+const withUrlParams = (expectedUrlParams: {...}) => ({urlParams}) =>
+    Object.keys(expectedUrlParams).every(
+        (paramName) => urlParams[paramName] === expectedUrlParams[paramName]
+    );
 
-const withMethod = expectedMethod => ({method}) => method === expectedMethod;
+const withMethod = (expectedMethod) => ({method}) => method === expectedMethod;
 
 const anyRequest = () => true;
 
@@ -22,7 +24,7 @@ test('Can config the sever port', () => {
     mockingServer.close();
 });
 
-test('Can stub requests', done => {
+test('Can stub requests', (done) => {
     mockingServer.stub(withUrlParams({message: 'ping'})).returns(text('pong'));
 
     request.get('?message=ping').expect(200, 'pong', done);
@@ -39,24 +41,24 @@ test('Can spy mocked requests', async () => {
 });
 
 test('Can mock with custom implementation', async () => {
-    const spy = jest.fn(req => text(req.urlParams.message));
+    const spy = jest.fn((req) => text(req.urlParams.message));
     const pingMock = mockingServer.mockImplementation(withUrlParams({message: 'ping'}), spy);
 
-    const response = await request.get('?message=ping');
+    await request.get('?message=ping');
 
     expect(spy).toHaveBeenCalled();
 });
 
 test('allows asserting calledWith using mockImplementation', async () => {
     const spy = jest.fn(() => text('any response text'));
-    const pingMock = mockingServer.mockImplementation(anyRequest, req => spy(req.urlParams));
+    const pingMock = mockingServer.mockImplementation(anyRequest, (req) => spy(req.urlParams));
 
-    const response = await request.get('?message=ping');
+    await request.get('?message=ping');
 
     expect(spy).toHaveBeenCalledWith({message: 'ping'});
 });
 
-test('Can stub a json response', done => {
+test('Can stub a json response', (done) => {
     mockingServer.stub(withUrlParams({message: 'ping'})).returns(json({message: 'pong'}));
 
     request
@@ -65,16 +67,13 @@ test('Can stub a json response', done => {
         .expect(200, {message: 'pong'}, done);
 });
 
-test('Can stub a html response', done => {
+test('Can stub a html response', (done) => {
     mockingServer.stub(withUrlParams({message: 'ping'})).returns(html('<body>hello</body>'));
 
-    request
-        .get('?message=ping')
-        .expect('content-type', 'text/html')
-        .expect(200, '<body>hello</body>', done);
+    request.get('?message=ping').expect('content-type', 'text/html').expect(200, '<body>hello</body>', done);
 });
 
-test('The last matching stub wins', done => {
+test('The last matching stub wins', (done) => {
     mockingServer.stub(withMethod('GET')).returns(text('this loses'));
     mockingServer.stub(withUrlParams({a: 'test'})).returns(text('this wins'));
 

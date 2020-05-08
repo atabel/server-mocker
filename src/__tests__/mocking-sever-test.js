@@ -10,7 +10,7 @@ const ANY_REQUEST = {
 };
 
 test('mocking-server throws on unhandled request', () => {
-    const server = createMockingServer();
+    const server = createMockingServer({});
     expect(() => {
         server.handle(ANY_REQUEST);
     }).toThrow();
