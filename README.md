@@ -2,8 +2,6 @@
 
 Create a mocked http server for your webapp tests and development
 
-<!-- TOC depthFrom:2 -->
-
 - [Install](#install)
 - [Examples](#examples)
   - [Testing](#testing)
@@ -16,6 +14,7 @@ Create a mocked http server for your webapp tests and development
     - [`.mockImplementation(predicate, fn)`](#mockimplementationpredicate-fn)
     - [`.clearAll()`](#clearall)
     - [`.close()`](#close)
+    - [`.port`](#port)
   - [`Stub`](#stub)
     - [`.clear()`](#clear)
   - [`Mock`](#mock)
@@ -28,8 +27,6 @@ Create a mocked http server for your webapp tests and development
   - [`text(content, [headers])`](#textcontent-headers)
   - [`html(content, [headers])`](#htmlcontent-headers)
   - [`json(data, [headers])`](#jsondata-headers)
-
-<!-- /TOC -->
 
 ## Install
 
@@ -117,7 +114,8 @@ Creates an http(s) server instance where you can mock/stub responses
 **Parameters**
 
 - `options`: **Object**
-  - `port`: **number** the server will run in this port
+  - `port`?: **number** the server will run in this port. If not provided, the server will use a random
+    available port. You can then read it with `server.port`
   - `ssl`?:
     **[Object](https://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener)** you
     can pase an object with ssl options to use https. When not specified, the server will use http
@@ -127,6 +125,12 @@ Creates an http(s) server instance where you can mock/stub responses
 **Returns**: [`MockingServer`](#mokingserver)
 
 **Examples**
+
+```js
+const mockingServer = createServer();
+```
+
+using a given port:
 
 ```js
 const mockingServer = createServer({port: 5000});
@@ -232,6 +236,10 @@ Removes all the stubs and mocks from the server and closes the server connection
 ```js
 mockingServer.close();
 ```
+
+#### `.port`
+
+(`number`) the server port.
 
 ### `Stub`
 
