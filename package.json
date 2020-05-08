@@ -10,7 +10,8 @@
     ],
     "scripts": {
         "build": "rimraf lib && flow check && babel src/ -d lib/ --ignore '**/__tests__/**' && flow-copy-source -v -i '**/__tests__/**' src lib",
-        "prepublishOnly": "yarn test && yarn build",
+        "ci": "yarn test --ci && yarn build",
+        "prepublishOnly": "yarn ci",
         "test": "jest",
         "precommit": "lint-staged"
     },
