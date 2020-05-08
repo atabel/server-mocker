@@ -4,30 +4,30 @@ Create a mocked http server for your webapp tests and development
 
 <!-- TOC depthFrom:2 -->
 
--   [Install](#install)
--   [Examples](#examples)
-    -   [Testing](#testing)
-    -   [Dev api server](#dev-api-server)
--   [API](#api)
-    -   [`createServer(options)`](#createserveroptions)
-    -   [`MokingServer`](#mokingserver)
-        -   [`.stub(predicate)`](#stubpredicate)
-        -   [`.mock(predicate)`](#mockpredicate)
-        -   [`.mockImplementation(predicate, fn)`](#mockimplementationpredicate-fn)
-        -   [`.clearAll()`](#clearall)
-        -   [`.close()`](#close)
-    -   [`Stub`](#stub)
-        -   [`.clear()`](#clear)
-    -   [`Mock`](#mock)
-        -   [`.clear()`](#clear-1)
-        -   [`.called()`](#called)
-        -   [`.calledOnce()`](#calledonce)
-        -   [`.getCallCount()`](#getcallcount)
-    -   [`Request`](#request)
-    -   [`Response`](#response)
-    -   [`text(content, [headers])`](#textcontent-headers)
-    -   [`html(content, [headers])`](#htmlcontent-headers)
-    -   [`json(data, [headers])`](#jsondata-headers)
+- [Install](#install)
+- [Examples](#examples)
+  - [Testing](#testing)
+  - [Dev api server](#dev-api-server)
+- [API](#api)
+  - [`createServer(options)`](#createserveroptions)
+  - [`MokingServer`](#mokingserver)
+    - [`.stub(predicate)`](#stubpredicate)
+    - [`.mock(predicate)`](#mockpredicate)
+    - [`.mockImplementation(predicate, fn)`](#mockimplementationpredicate-fn)
+    - [`.clearAll()`](#clearall)
+    - [`.close()`](#close)
+  - [`Stub`](#stub)
+    - [`.clear()`](#clear)
+  - [`Mock`](#mock)
+    - [`.clear()`](#clear-1)
+    - [`.called()`](#called)
+    - [`.calledOnce()`](#calledonce)
+    - [`.getCallCount()`](#getcallcount)
+  - [`Request`](#request)
+  - [`Response`](#response)
+  - [`text(content, [headers])`](#textcontent-headers)
+  - [`html(content, [headers])`](#htmlcontent-headers)
+  - [`json(data, [headers])`](#jsondata-headers)
 
 <!-- /TOC -->
 
@@ -48,7 +48,8 @@ If you use yarn:
 You have a webapp with the following code:
 
 ```js
-export const getUserData = userId => fetch(`http://localhost:5000/user?id=${userId}`).then(res => res.json());
+export const getUserData = (userId) =>
+  fetch(`http://localhost:5000/user?id=${userId}`).then((res) => res.json());
 ```
 
 You want to write a test for that code and you need to mock the server response. You can use `server-mocker`
@@ -59,20 +60,20 @@ import {createServer, json} from 'server-mocker';
 
 const mockingServer = createServer({port: 5000});
 
-const requestUser = expectedUserId => request =>
-    request.urlPath === '/user' && urlParams.id === expectedUserId;
+const requestUser = (expectedUserId) => (request) =>
+  request.urlPath === '/user' && urlParams.id === expectedUserId;
 
 test('getUserData', async () => {
-    const userId = 'any_user_id';
-    const userData = {
-        name: 'Abel',
-    };
+  const userId = 'any_user_id';
+  const userData = {
+    name: 'Abel',
+  };
 
-    mockingServer.stub(requestUser(userId)).returns(json(userData));
+  mockingServer.stub(requestUser(userId)).returns(json(userData));
 
-    const userData = await getUserData(userId);
+  const userData = await getUserData(userId);
 
-    expect(userData.name).toBe('Abel');
+  expect(userData.name).toBe('Abel');
 });
 ```
 
@@ -87,12 +88,12 @@ import {createServer, json} from 'server-mocker';
 
 const mockingServer = createServer({port: 5000});
 
-const requestUser = request => request.urlPath === '/user';
+const requestUser = (request) => request.urlPath === '/user';
 
 mockingServer.stub(user()).returns(
-    json({
-        name: 'Abel',
-    })
+  json({
+    name: 'Abel',
+  })
 );
 ```
 
@@ -102,9 +103,9 @@ In your application you can change your api endpoint depending on `process.env.N
 
 ```js
 const API_ENDPOINT =
-    process.env.NODE_ENV === 'production' ? 'http://my-real-api.com/' : 'http://localhost:5000';
+  process.env.NODE_ENV === 'production' ? 'http://my-real-api.com/' : 'http://localhost:5000';
 
-export const getUserData = userId => fetch(`${API_ENDPOINT}/user?id=${userId}`).then(res => res.json());
+export const getUserData = (userId) => fetch(`${API_ENDPOINT}/user?id=${userId}`).then((res) => res.json());
 ```
 
 ## API
@@ -115,13 +116,13 @@ Creates an http(s) server instance where you can mock/stub responses
 
 **Parameters**
 
--   `options`: **Object**
-    -   `port`: **number** the server will run in this port
-    -   `ssl`?:
-        **[Object](https://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener)** you
-        can pase an object with ssl options to use https. When not specified, the server will use http
-    -   `onResponseNotFound`?: (r: [`Request`](#request)) => `mixed` You can specify a listener to be called when
-        a the server receives a server which doesn't know how to reply to.
+- `options`: **Object**
+  - `port`: **number** the server will run in this port
+  - `ssl`?:
+    **[Object](https://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener)** you
+    can pase an object with ssl options to use https. When not specified, the server will use http
+  - `onResponseNotFound`?: (r: [`Request`](#request)) => `mixed` You can specify a listener to be called when
+    a the server receives a server which doesn't know how to reply to.
 
 **Returns**: [`MockingServer`](#mokingserver)
 
@@ -135,11 +136,11 @@ with ssl:
 
 ```js
 const mockingServer = createServer({
-    port: 5000,
-    ssl: {
-        key: fs.readFileSync(__dirname + '/server.key'),
-        cert: fs.readFileSync(__dirname + '/server.crt'),
-    },
+  port: 5000,
+  ssl: {
+    key: fs.readFileSync(__dirname + '/server.key'),
+    cert: fs.readFileSync(__dirname + '/server.crt'),
+  },
 });
 ```
 
@@ -151,11 +152,11 @@ Configures a stubbed response for the requests that match the given predicate
 
 **Parameters**
 
--   `predicate`: (r: [`Request`](#request)) => `boolean`
+- `predicate`: (r: [`Request`](#request)) => `boolean`
 
 **Returns**: `Object` with key:
 
--   `returns`: ([`Response`](#response)) => [`Stub`](#stub)
+- `returns`: ([`Response`](#response)) => [`Stub`](#stub)
 
 **Example**
 
@@ -165,10 +166,10 @@ import {createServer, text} from 'server-mocker';
 const mockingServer = createServer({port: 5000});
 
 // A request predicate wich matches when url has the expected params
-const withUrlParams = expectedUrlParams => request =>
-    Object.keys(expectedUrlParams).every(
-        paramName => request.urlParams[paramName] === expectedUrlParams[paramName]
-    );
+const withUrlParams = (expectedUrlParams) => (request) =>
+  Object.keys(expectedUrlParams).every(
+    (paramName) => request.urlParams[paramName] === expectedUrlParams[paramName]
+  );
 
 // Stub the server to return the text "pong" when a request with ?message=ping is received
 mockingServer.stub(witUrlParams({message: 'ping'})).returns(text('pong'));
@@ -180,11 +181,11 @@ Similar to `.stub`, the difference is you can make expectations for received req
 
 **Parameters**
 
--   `predicate`: (r: [`Request`](#request)) => `boolean`
+- `predicate`: (r: [`Request`](#request)) => `boolean`
 
 **Returns**: `Object` with key:
 
--   `returns`: ([`Response`](#response)) => [`Mock`](#mock)
+- `returns`: ([`Response`](#response)) => [`Mock`](#mock)
 
 **Example**
 
@@ -194,20 +195,21 @@ const mock = mockingServer.mock(witUrlParams({message: 'ping'})).returns(text('p
 
 #### `.mockImplementation(predicate, fn)`
 
-If you need more control, you can use `mockImplementation`, instead of providing a return value, you provide a function that is called with the matching request and should return a response.
+If you need more control, you can use `mockImplementation`, instead of providing a return value, you provide a
+function that is called with the matching request and should return a response.
 
 **Parameters**
 
--   `predicate`: (r: [`Request`](#request)) => `boolean`
--   `fn`: (r: [`Request`](#request)) => [`Response`](#response)
+- `predicate`: (r: [`Request`](#request)) => `boolean`
+- `fn`: (r: [`Request`](#request)) => [`Response`](#response)
 
 **Returns**: [`Stub`](#stub)
 
 **Example**
 
 ```js
-mockingServer.mockImplementation(witUrlParams({message: 'ping'}), request => {
-    return text(String(Math.random()));
+mockingServer.mockImplementation(witUrlParams({message: 'ping'}), (request) => {
+  return text(String(Math.random()));
 });
 ```
 
@@ -265,19 +267,19 @@ Removes the mock from the server
 
 It's an object with these fields:
 
--   `method`: **string** http method (`'GET'`, `'POST'`, `'PUT'`...)
--   `urlPath`: **string** the url path, for example `'/about'`
--   `urlParams`: **Object** a key-value object with url params
--   `formFields`: **Object** a key-value object with form fields
--   `headers`: **Object** a key-value object with request headers
+- `method`: **string** http method (`'GET'`, `'POST'`, `'PUT'`...)
+- `urlPath`: **string** the url path, for example `'/about'`
+- `urlParams`: **Object** a key-value object with url params
+- `formFields`: **Object** a key-value object with form fields
+- `headers`: **Object** a key-value object with request headers
 
 ### `Response`
 
 It's an object with these fields:
 
--   `content`: **string** http response content
--   `headers`: **Object** a key-value object with request headers
--   `statusCode`: **number** http status code (`200`, `404`, `302`...)
+- `content`: **string** http response content
+- `headers`: **Object** a key-value object with request headers
+- `statusCode`: **number** http status code (`200`, `404`, `302`...)
 
 ### `text(content, [headers])`
 
@@ -285,8 +287,8 @@ Creates a response with content type `'text/plain'` and with the given `content`
 
 **Parameters**
 
--   `content`: **string**
--   `headers`?: **headers**
+- `content`: **string**
+- `headers`?: **headers**
 
 **Returns** [`Response`](#response)
 
@@ -296,8 +298,8 @@ Creates a response with content type `'text/html'` and with the given `content` 
 
 **Parameters**
 
--   `content`: **string**
--   `headers`?: **headers**
+- `content`: **string**
+- `headers`?: **headers**
 
 **Returns** [`Response`](#response)
 
@@ -307,7 +309,7 @@ Creates a response with content type `'application/json'` and with the given `da
 
 **Parameters**
 
--   `data`: **mixed** this data is json-encoded into response's content
--   `headers`?: **headers**
+- `data`: **mixed** this data is json-encoded into response's content
+- `headers`?: **headers**
 
 **Returns** [`Response`](#response)

@@ -55,7 +55,7 @@ const createServer = (options?: Options): Server => {
                 const {headers: responseHeaders, content, statusCode} = res;
 
                 response.statusCode = statusCode;
-                Object.keys(responseHeaders).forEach(h => response.setHeader(h, responseHeaders[h]));
+                Object.keys(responseHeaders).forEach((h) => response.setHeader(h, responseHeaders[h]));
                 response.write(content);
                 response.end();
             }
@@ -64,13 +64,13 @@ const createServer = (options?: Options): Server => {
 
     const server = ssl ? https.createServer(ssl, handleRequest) : http.createServer(handleRequest);
 
-    server.listen(port, undefined, undefined, err => {
+    server.listen(port, undefined, undefined, (err) => {
         if (err) throw err;
     });
 
     const connections = new Set();
 
-    server.on('connection', conn => {
+    server.on('connection', (conn) => {
         connections.add(conn);
         conn.on('close', () => {
             connections.delete(conn);
@@ -79,12 +79,12 @@ const createServer = (options?: Options): Server => {
 
     return {
         close(): Promise<void> {
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
                 mockingServer.clearAll();
                 server.close(() => {
                     resolve();
                 });
-                connections.forEach(conn => {
+                connections.forEach((conn) => {
                     conn.destroy();
                 });
                 connections.clear();

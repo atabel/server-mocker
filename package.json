@@ -10,17 +10,11 @@
     ],
     "scripts": {
         "build": "rimraf lib && flow check && babel src/ -d lib/ --ignore '**/__tests__/**' && flow-copy-source -v -i '**/__tests__/**' src lib",
-        "ci": "yarn test --ci && yarn build",
+        "ci": "yarn prettier-check && yarn test --ci && yarn build",
         "prepublishOnly": "yarn ci",
         "test": "jest",
-        "precommit": "lint-staged"
-    },
-    "prettier": {
-        "printWidth": 110,
-        "tabWidth": 4,
-        "singleQuote": true,
-        "trailingComma": "es5",
-        "bracketSpacing": false
+        "precommit": "lint-staged",
+        "prettier-check": "prettier . --check"
     },
     "lint-staged": {
         "*.{js,json,css,md}": [

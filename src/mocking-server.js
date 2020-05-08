@@ -19,7 +19,7 @@ type RequestPredicate = (req: Request) => boolean;
 
 type ConfiguredResponse = {
     predicate: RequestPredicate,
-    responseHandler: Request => Response,
+    responseHandler: (Request) => Response,
     spy?: {
         calls: Array<Request>,
     },
@@ -107,7 +107,7 @@ const createMockingServer = (options: MockingServerOptions): MockingServer => {
 
     const addConfiguredResponse = (
         predicate: RequestPredicate,
-        responseHandler: Request => Response
+        responseHandler: (Request) => Response
     ): ConfiguredResponse => {
         const configuredResponse = {
             predicate,
@@ -120,7 +120,7 @@ const createMockingServer = (options: MockingServerOptions): MockingServer => {
     };
 
     const clear = (confResp: ConfiguredResponse) => {
-        const index = configuredResponses.findIndex(c => c === confResp);
+        const index = configuredResponses.findIndex((c) => c === confResp);
         configuredResponses.splice(index, 1);
     };
 
@@ -146,7 +146,7 @@ const createMockingServer = (options: MockingServerOptions): MockingServer => {
         returns: (response: Response) => mockImplementation(predicate, () => response),
     });
 
-    const mockImplementation = (predicate: RequestPredicate, implementation: Request => Response) =>
+    const mockImplementation = (predicate: RequestPredicate, implementation: (Request) => Response) =>
         clearable(addConfiguredResponse(predicate, implementation));
 
     const getRequests = () => requests;
