@@ -1,9 +1,21 @@
 [ignore]
+.*/node_modules/.*
+.*/lib/.*
 
 [include]
 
 [libs]
 
 [lints]
+untyped-type-import=error
+unsafe-getters-setters=error
+implicit-inexact-object=error
 
 [options]
+include_warnings=true
+suppress_comment= \\(.\\|\n\\)*\\$FlowFixMe
+suppress_comment= \\(.\\|\n\\)*\\$ExpectError
+esproposal.optional_chaining=enable
+exact_by_default=true
+experimental.well_formed_exports=true
+experimental.types_first=true

@@ -1,5 +1,5 @@
 // @flow
-type ParamsBag = {[name: string]: string};
+type ParamsBag = {[name: string]: string, ...};
 
 export type Request = {
     method: string,
@@ -9,7 +9,7 @@ export type Request = {
     headers: ParamsBag,
 };
 
-type Response = {
+export type Response = {
     content: string,
     headers: ParamsBag,
     statusCode: number,
@@ -19,7 +19,7 @@ type RequestPredicate = (req: Request) => boolean;
 
 type ConfiguredResponse = {
     predicate: RequestPredicate,
-    responseHandler: Request => Response,
+    responseHandler: (Request) => Response,
     spy?: {
         calls: Array<Request>,
     },
@@ -31,14 +31,14 @@ const createResponse = (content = '', headers = {}, statusCode = 200): Response 
     statusCode,
 });
 
-const createJsonResponse = (data: mixed, headers: ParamsBag = {}) =>
-    createResponse(JSON.stringify(data), {'content-type': 'application/json', ...headers});
+const createJsonResponse = (data: mixed, headers: ParamsBag = {}): Response =>
+    createResponse(JSON.stringify(data), {...headers, 'content-type': 'application/json'});
 
 const createTextResponse = (text: string, headers: ParamsBag = {}): Response =>
-    createResponse(text, {'content-type': 'text/plain', ...headers});
+    createResponse(text, {...headers, 'content-type': 'text/plain'});
 
 const createHtmlResponse = (html: string, headers: ParamsBag = {}): Response =>
-    createResponse(html, {'content-type': 'text/html', ...headers});
+    createResponse(html, {...headers, 'content-type': 'text/html'});
 
 const called = (confResp: ConfiguredResponse) =>
     !!(confResp.spy && confResp.spy.calls && confResp.spy.calls.length);
@@ -53,14 +53,34 @@ type MockingServerOptions = {
     onResponseNotFound?: (r: Request) => mixed,
 };
 
-const defaultOptions: MockingServerOptions = {
-    onResponseNotFound(request) {
-        throw `response not found for request ${JSON.stringify(request)}`;
+type MockingServer = {
+    handle: (request: Request) => ?Response,
+    clearAll: () => void,
+    getRequests: () => Array<Request>,
+    mock: (
+        predicate: RequestPredicate
+    ) => {
+        returns: (
+            response: Response
+        ) => {
+            called: () => boolean,
+            calledOnce: () => boolean,
+            clear: () => void,
+            getCallCount: () => number,
+        },
+    },
+    mockImplementation: (
+        predicate: RequestPredicate,
+        implementation: (Request) => Response
+    ) => {clear: () => void},
+    stub: (
+        predicate: RequestPredicate
+    ) => {
+        returns: (response: Response) => {clear: () => void},
     },
 };
 
-const createMockingServer = (options: MockingServerOptions = defaultOptions) => {
-    const opts = {...defaultOptions, ...options};
+const createMockingServer = (options: MockingServerOptions): MockingServer => {
     let configuredResponses: Array<ConfiguredResponse> = [];
     let requests: Array<Request> = [];
 
@@ -69,8 +89,11 @@ const createMockingServer = (options: MockingServerOptions = defaultOptions) => 
         const confResp = configuredResponses.find(({predicate}) => predicate(request));
 
         if (!confResp) {
-            opts.onResponseNotFound(request);
-            return;
+            if (options.onResponseNotFound) {
+                options.onResponseNotFound(request);
+                return;
+            }
+            throw Error(`response not found for request ${JSON.stringify(request)}`);
         }
 
         const {responseHandler, spy} = confResp;
@@ -84,7 +107,7 @@ const createMockingServer = (options: MockingServerOptions = defaultOptions) => 
 
     const addConfiguredResponse = (
         predicate: RequestPredicate,
-        responseHandler: Request => Response
+        responseHandler: (Request) => Response
     ): ConfiguredResponse => {
         const configuredResponse = {
             predicate,
@@ -97,7 +120,7 @@ const createMockingServer = (options: MockingServerOptions = defaultOptions) => 
     };
 
     const clear = (confResp: ConfiguredResponse) => {
-        const index = configuredResponses.findIndex(c => c === confResp);
+        const index = configuredResponses.findIndex((c) => c === confResp);
         configuredResponses.splice(index, 1);
     };
 
@@ -123,7 +146,7 @@ const createMockingServer = (options: MockingServerOptions = defaultOptions) => 
         returns: (response: Response) => mockImplementation(predicate, () => response),
     });
 
-    const mockImplementation = (predicate: RequestPredicate, implementation: Request => Response) =>
+    const mockImplementation = (predicate: RequestPredicate, implementation: (Request) => Response) =>
         clearable(addConfiguredResponse(predicate, implementation));
 
     const getRequests = () => requests;
