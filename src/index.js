@@ -26,40 +26,73 @@ type Options = {
     onResponseNotFound?: (r: Request) => mixed,
 };
 
+const CONTENT_TYPE_MULTIPART_RE = /^multipart\/(?:form-data|related)(?:;|$)/i;
+const isMultipart = (contentType) => CONTENT_TYPE_MULTIPART_RE.exec(contentType);
+
 const createServer = (options?: Options): Server => {
     const {port = 0, ssl, onResponseNotFound} = options || {};
     const mockingServer = createMockingServer({onResponseNotFound});
 
+    const sendResponse = (response, headers, code, content) => {
+        response.statusCode = code;
+        Object.keys(headers).forEach((h) => response.setHeader(h, headers[h]));
+        response.write(content);
+        response.end();
+    };
+
     const handleRequest = (request, response) => {
-        const form = new multiparty.Form();
-        form.parse(request, (err, formFields = {}, files) => {
-            const {method, url, headers} = request;
-            const {pathname, query = {}} = parseUrl(url, true);
+        const {method, url, headers} = request;
+        const {pathname, query = {}} = parseUrl(url, true);
+        const contentType = request.headers['content-type'];
 
-            if (pathname === '/__admin__/kill') {
-                response.write('killed');
-                response.end(() => {
-                    process.exit();
+        if (pathname === '/__admin__/kill') {
+            response.write('killed');
+            response.end(() => {
+                process.exit();
+            });
+        }
+
+        if (isMultipart(contentType)) {
+            const form = new multiparty.Form();
+            form.parse(request, (err, formFields = {}, files) => {
+                console.log(err, formFields, files);
+                const res = mockingServer.handle({
+                    method,
+                    urlPath: pathname || '',
+                    urlParams: query,
+                    headers,
+                    formFields,
                 });
-            }
 
-            const res = mockingServer.handle({
-                method,
-                urlPath: pathname || '',
-                urlParams: query,
-                headers,
-                formFields,
+                if (res) {
+                    const {headers: responseHeaders, content, statusCode} = res;
+
+                    sendResponse(response, responseHeaders, statusCode, content);
+                }
+            });
+        } else {
+            let body = '';
+
+            request.on('data', (data) => {
+                body += data;
             });
 
-            if (res) {
-                const {headers: responseHeaders, content, statusCode} = res;
+            request.on('end', () => {
+                const res = mockingServer.handle({
+                    method,
+                    urlPath: pathname || '',
+                    urlParams: query,
+                    headers,
+                    formFields: body,
+                });
 
-                response.statusCode = statusCode;
-                Object.keys(responseHeaders).forEach((h) => response.setHeader(h, responseHeaders[h]));
-                response.write(content);
-                response.end();
-            }
-        });
+                if (res) {
+                    const {headers: responseHeaders, content, statusCode} = res;
+
+                    sendResponse(response, responseHeaders, statusCode, content);
+                }
+            });
+        }
     };
 
     const server = ssl ? https.createServer(ssl, handleRequest) : http.createServer(handleRequest);

@@ -5,7 +5,7 @@ export type Request = {
     method: string,
     urlPath: string,
     urlParams: ParamsBag,
-    formFields: ParamsBag,
+    formFields: ParamsBag | string,
     headers: ParamsBag,
 };
 
