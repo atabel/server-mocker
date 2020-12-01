@@ -8,7 +8,7 @@ declare module 'server-mocker' {
         onResponseNotFound?: (r: Request) => mixed;
     };
 
-    declare export type Request = {
+    declare type Request = {
         method: string;
         urlPath: string;
         urlParams: ParamsBag;
@@ -16,43 +16,42 @@ declare module 'server-mocker' {
         headers: ParamsBag;
     };
 
-    declare export type Response = {
+    declare type Response = {
         content: string;
         headers: ParamsBag;
         statusCode: number;
     };
 
-
-    declare export function createServer(
+    declare function createServer(
         opts: Options
     ): {
-        port: number,
-        clearAll: () => void,
-        close: () => Promise<void>,
-        getRequests: () => Array<Request>,
+        port: number;
+        clearAll: () => void;
+        close: () => Promise<void>;
+        getRequests: () => Array<Request>;
         mock: (
             predicate: RequestPredicate
         ) => {
             returns: (
                 response: Response
             ) => {
-                called: () => boolean,
-                calledOnce: () => boolean,
-                clear: () => void,
-                getCallCount: () => number,
-            },
-        },
+                called: () => boolean;
+                calledOnce: () => boolean;
+                clear: () => void;
+                getCallCount: () => number;
+            };
+        };
         mockImplementation: (
             predicate: RequestPredicate,
             implementation: (request: Request) => Response
-        ) => {clear: () => void},
+        ) => {clear: () => void};
         stub: (
             predicate: RequestPredicate
         ) => {
-            returns: (response: Response) => {clear: () => void},
-        },
+            returns: (response: Response) => {clear: () => void};
+        };
     };
-    declare export function html(html: string, headers?: ParamsBag): Response;
-    declare export function json(data: mixed, headers?: ParamsBag): Response;
-    declare export function text(text: string, headers?: ParamsBag): Response;
+    declare function html(html: string, headers?: ParamsBag): Response;
+    declare function json(data: mixed, headers?: ParamsBag): Response;
+    declare function text(text: string, headers?: ParamsBag): Response;
 }
