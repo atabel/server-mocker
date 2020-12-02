@@ -46,7 +46,7 @@ const createServer = (options?: Options): Server => {
 
     const handleRequest = (request, response) => {
         const {method, url, headers} = request;
-        const {pathname = '', query = {}} = parseUrl(url, true);
+        const {pathname, query = {}} = parseUrl(url, true);
         const contentType = request.headers['content-type'];
 
         if (pathname === '/__admin__/kill') {
@@ -59,7 +59,7 @@ const createServer = (options?: Options): Server => {
         if (method === 'GET') {
             const res = mockingServer.handle({
                 method,
-                urlPath: pathname,
+                urlPath: pathname || '',
                 urlParams: query,
                 headers,
                 formFields: {},
@@ -76,7 +76,7 @@ const createServer = (options?: Options): Server => {
                 console.log(err, formFields, files);
                 const res = mockingServer.handle({
                     method,
-                    urlPath: pathname,
+                    urlPath: pathname || '',
                     urlParams: query,
                     headers,
                     formFields,
@@ -98,7 +98,7 @@ const createServer = (options?: Options): Server => {
             request.on('end', () => {
                 const res = mockingServer.handle({
                     method,
-                    urlPath: pathname,
+                    urlPath: pathname || '',
                     urlParams: query,
                     headers,
                     formFields: querystring.parse(body),
@@ -127,7 +127,7 @@ const createServer = (options?: Options): Server => {
 
                 const res = mockingServer.handle({
                     method,
-                    urlPath: pathname,
+                    urlPath: pathname || '',
                     urlParams: query,
                     headers,
                     formFields,
