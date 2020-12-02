@@ -108,7 +108,7 @@ test('Requests made can be retrived', async () => {
     expect(mockingServer.getRequests().length).toBe(2);
 });
 
-test('Stub POST json request', async () => {
+test('Request POST json request', async () => {
     mockingServer.mock(withMethod('POST')).returns(json({success: true}));
 
     await request
@@ -118,7 +118,20 @@ test('Stub POST json request', async () => {
         .expect(200, {success: true});
 
     expect(mockingServer.getRequests().length).toBe(1);
-    expect(mockingServer.getRequests()[0].formFields).toBe(JSON.stringify({test1: '1', test2: 2}));
+    expect(mockingServer.getRequests()[0].formFields).toMatchObject({test1: '1', test2: 2});
+});
+
+test('Request POST x-www-form-urlencoded request', async () => {
+    mockingServer.mock(withMethod('POST')).returns(json({success: true}));
+
+    await request
+        .post('/')
+        .set('content-type', 'application/x-www-form-urlencoded')
+        .send({test1: '1', test2: '2'})
+        .expect(200, {success: true});
+
+    expect(mockingServer.getRequests().length).toBe(1);
+    expect(mockingServer.getRequests()[0].formFields).toMatchObject({test1: '1', test2: '2'});
 });
 
 afterAll(() => {

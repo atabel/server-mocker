@@ -4,6 +4,7 @@ const https = require('https');
 const http = require('http');
 const {parse: parseUrl} = require('url');
 const multiparty = require('multiparty');
+const querystring = require('querystring');
 const {createMockingServer, text, json, html} = require('./mocking-server');
 
 type RequestPredicate = (req: Request) => boolean;
@@ -27,7 +28,10 @@ type Options = {
 };
 
 const CONTENT_TYPE_MULTIPART_RE = /^multipart\/(?:form-data|related)(?:;|$)/i;
+const CONTENT_TYPE_FORM_URLENCODED_RE = /^application\/x-www-form-urlencoded(?:;|$)/i;
+
 const isMultipart = (contentType) => CONTENT_TYPE_MULTIPART_RE.exec(contentType);
+const isFormUrlencoded = (contentType) => CONTENT_TYPE_FORM_URLENCODED_RE.exec(contentType);
 
 const createServer = (options?: Options): Server => {
     const {port = 0, ssl, onResponseNotFound} = options || {};
@@ -42,7 +46,7 @@ const createServer = (options?: Options): Server => {
 
     const handleRequest = (request, response) => {
         const {method, url, headers} = request;
-        const {pathname, query = {}} = parseUrl(url, true);
+        const {pathname = '', query = {}} = parseUrl(url, true);
         const contentType = request.headers['content-type'];
 
         if (pathname === '/__admin__/kill') {
@@ -52,16 +56,52 @@ const createServer = (options?: Options): Server => {
             });
         }
 
+        if (method === 'GET') {
+            const res = mockingServer.handle({
+                method,
+                urlPath: pathname,
+                urlParams: query,
+                headers,
+                formFields: {},
+            });
+
+            if (res) {
+                return sendResponse(response, res.headers, res.statusCode, res.content);
+            }
+        }
+
         if (isMultipart(contentType)) {
             const form = new multiparty.Form();
             form.parse(request, (err, formFields = {}, files) => {
                 console.log(err, formFields, files);
                 const res = mockingServer.handle({
                     method,
-                    urlPath: pathname || '',
+                    urlPath: pathname,
                     urlParams: query,
                     headers,
                     formFields,
+                });
+
+                if (res) {
+                    const {headers: responseHeaders, content, statusCode} = res;
+
+                    sendResponse(response, responseHeaders, statusCode, content);
+                }
+            });
+        } else if (isFormUrlencoded(contentType)) {
+            let body = '';
+
+            request.on('data', (data) => {
+                body += data;
+            });
+
+            request.on('end', () => {
+                const res = mockingServer.handle({
+                    method,
+                    urlPath: pathname,
+                    urlParams: query,
+                    headers,
+                    formFields: querystring.parse(body),
                 });
 
                 if (res) {
@@ -78,12 +118,19 @@ const createServer = (options?: Options): Server => {
             });
 
             request.on('end', () => {
+                let formFields: ?{[name: string]: string, ...};
+                try {
+                    formFields = JSON.parse(body);
+                } catch (e) {
+                    return sendResponse(response, headers, 500, 'Unsupported content-type ' + contentType);
+                }
+
                 const res = mockingServer.handle({
                     method,
-                    urlPath: pathname || '',
+                    urlPath: pathname,
                     urlParams: query,
                     headers,
-                    formFields: body,
+                    formFields,
                 });
 
                 if (res) {
