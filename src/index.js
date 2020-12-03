@@ -88,28 +88,6 @@ const createServer = (options?: Options): Server => {
                     sendResponse(response, responseHeaders, statusCode, content);
                 }
             });
-        } else if (isFormUrlencoded(contentType)) {
-            let body = '';
-
-            request.on('data', (data) => {
-                body += data;
-            });
-
-            request.on('end', () => {
-                const res = mockingServer.handle({
-                    method,
-                    urlPath: pathname || '',
-                    urlParams: query,
-                    headers,
-                    formFields: querystring.parse(body),
-                });
-
-                if (res) {
-                    const {headers: responseHeaders, content, statusCode} = res;
-
-                    sendResponse(response, responseHeaders, statusCode, content);
-                }
-            });
         } else {
             let body = '';
 
@@ -118,11 +96,21 @@ const createServer = (options?: Options): Server => {
             });
 
             request.on('end', () => {
-                let formFields: ?{[name: string]: string, ...};
-                try {
-                    formFields = JSON.parse(body);
-                } catch (e) {
-                    return sendResponse(response, headers, 500, 'Unsupported content-type ' + contentType);
+                let bodyParsed;
+
+                if (isFormUrlencoded(contentType)) {
+                    bodyParsed = querystring.parse(body);
+                } else {
+                    try {
+                        bodyParsed = JSON.parse(body);
+                    } catch (e) {
+                        return sendResponse(
+                            response,
+                            headers,
+                            500,
+                            'Unsupported content-type ' + contentType
+                        );
+                    }
                 }
 
                 const res = mockingServer.handle({
@@ -130,7 +118,7 @@ const createServer = (options?: Options): Server => {
                     urlPath: pathname || '',
                     urlParams: query,
                     headers,
-                    formFields,
+                    formFields: bodyParsed,
                 });
 
                 if (res) {
