@@ -6,7 +6,8 @@
     "license": "MIT",
     "files": [
         "lib/",
-        "README.md"
+        "README.md",
+        "index.d.ts"
     ],
     "scripts": {
         "build": "rimraf lib && flow check && babel src/ -d lib/ --ignore '**/__tests__/**' && flow-copy-source -v -i '**/__tests__/**' src lib",
