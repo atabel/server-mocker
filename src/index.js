@@ -73,7 +73,6 @@ const createServer = (options?: Options): Server => {
         if (isMultipart(contentType)) {
             const form = new multiparty.Form();
             form.parse(request, (err, formFields = {}, files) => {
-                console.log(err, formFields, files);
                 const res = mockingServer.handle({
                     method,
                     urlPath: pathname || '',
