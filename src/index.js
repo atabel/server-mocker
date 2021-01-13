@@ -97,7 +97,7 @@ const createServer = (options?: Options): Server => {
             request.on('end', () => {
                 let bodyParsed;
 
-                if (!!body) {
+                if (body) {
                     if (isFormUrlencoded(contentType)) {
                         bodyParsed = querystring.parse(body);
                     } else {
