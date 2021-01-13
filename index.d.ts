@@ -12,7 +12,7 @@ declare module 'server-mocker' {
         method: string;
         urlPath: string;
         urlParams: ParamsBag;
-        formFields: ParamsBag | void;
+        formFields: ParamsBag;
         headers: ParamsBag;
     };
 

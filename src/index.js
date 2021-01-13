@@ -119,7 +119,7 @@ const createServer = (options?: Options): Server => {
                     urlPath: pathname || '',
                     urlParams: query,
                     headers,
-                    formFields: bodyParsed,
+                    formFields: bodyParsed || {},
                 });
 
                 if (res) {
