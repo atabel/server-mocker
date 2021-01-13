@@ -97,18 +97,20 @@ const createServer = (options?: Options): Server => {
             request.on('end', () => {
                 let bodyParsed;
 
-                if (isFormUrlencoded(contentType)) {
-                    bodyParsed = querystring.parse(body);
-                } else {
-                    try {
-                        bodyParsed = JSON.parse(body);
-                    } catch (e) {
-                        return sendResponse(
-                            response,
-                            headers,
-                            500,
-                            'Unsupported content-type ' + contentType
-                        );
+                if (body) {
+                    if (isFormUrlencoded(contentType)) {
+                        bodyParsed = querystring.parse(body);
+                    } else {
+                        try {
+                            bodyParsed = JSON.parse(body);
+                        } catch (e) {
+                            return sendResponse(
+                                response,
+                                headers,
+                                500,
+                                'Unsupported content-type ' + contentType
+                            );
+                        }
                     }
                 }
 
@@ -117,7 +119,7 @@ const createServer = (options?: Options): Server => {
                     urlPath: pathname || '',
                     urlParams: query,
                     headers,
-                    formFields: bodyParsed,
+                    formFields: bodyParsed || {},
                 });
 
                 if (res) {
