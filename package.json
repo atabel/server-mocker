@@ -1,6 +1,6 @@
 {
     "name": "server-mocker",
-    "version": "1.6.2",
+    "version": "1.6.3",
     "description": "mocking http server for acceptance tests",
     "main": "lib/index.js",
     "license": "MIT",
